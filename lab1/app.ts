@@ -17,3 +17,20 @@ function getAllWorkers(): myWorker[] {
 
 const workers = getAllWorkers();
 console.log(workers);
+
+function logFirstAvailable(workers: myWorker[] = getAllWorkers()): void {
+  console.log(`Кількість робітників: ${workers.length}`);
+
+  const firstAvailable = workers.find(w => w.available);
+  if (firstAvailable) {
+    console.log(`Перший доступний робітник: ${firstAvailable.name} ${firstAvailable.surname}`);
+  }
+
+  console.log("Колекція робітників:");
+  for (const w of workers) {
+    console.log(`- ${w.name} ${w.surname}, available: ${w.available}, salary: ${w.salary}`);
+  }
+}
+
+logFirstAvailable();
+
