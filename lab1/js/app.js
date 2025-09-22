@@ -45,12 +45,11 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 function showMenu() {
-    console.log("\n--- ГОЛОВНЕ МЕНЮ ---");
     console.log("1.1 – Базові типи");
     console.log("1.2 – Enum і фільтрація");
     console.log("1.3 – Стрілочні функції");
     console.log("1.4 – Типи функцій");
-    console.log("1.5 – Необов'язкові, додаткові та залишкові параметри");
+    console.log("1.5 – Додаткові параметри");
     console.log("0 – Вихід\n");
     rl.question("Введіть номер завдання: ", handleMenuChoice);
 }

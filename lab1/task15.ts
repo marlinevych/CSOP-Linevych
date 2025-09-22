@@ -1,22 +1,6 @@
 import * as readline from "readline";
-
-type Worker = {
-  id: number;
-  name: string;
-  surname: string;
-  available: boolean;
-  category: string;
-};
-
-let workers: Worker[] = [
-  { id: 1, name: "Ivan", surname: "Ivanov", available: true, category: "Designer" },
-  { id: 2, name: "Petro", surname: "Petrov", available: false, category: "Developer" },
-  { id: 3, name: "Olga", surname: "Shevchenko", available: true, category: "Designer" },
-];
-
-function getAllWorkers(): Worker[] {
-  return workers;
-}
+import { workers, getAllWorkers } from "./workers";
+import { Worker } from "./types";
 
 function getWorkerByID(id: number): Worker | undefined {
   return workers.find(w => w.id === id);
@@ -57,29 +41,66 @@ function сheckoutWorkers(customer: string, ...workerIDs: number[]): string[] {
 
 export function task15(rl: readline.Interface, callback: () => void) {
 
-  rl.question("Введіть ім'я замовника: ", (name) => {
-    rl.question("Введіть вік (або залиште пустим): ", (ageInput) => {
-      rl.question("Введіть місто (або залиште пустим): ", (cityInput) => {
-        let age = ageInput ? Number(ageInput) : undefined;
-        let city = cityInput || undefined;
-
-        createCustomer(name, age, city);
-
-        console.log("Прізвища дизайнерів:", getWorkersSurnamesByCategory());
-        logFirstAvailable();
-
-        console.log("Доступні ID працівників:", workers.map(w => w.id).join(", "));
-
-        rl.question("Введіть ID працівників через кому: ", (idsInput) => {
-          let workerIDs = idsInput.split(",").map(x => Number(x.trim()));
-          let myWorkers = сheckoutWorkers(name, ...workerIDs);
-
-          console.log("Доступні працівники:");
-          myWorkers.forEach(w => console.log(w));
-
-          callback();
-        });
-      });
+  function getName() {
+    rl.question("Введіть ім'я замовника: ", (name) => {
+      const namePattern = /^[A-Za-zА-Яа-яЁёЇїІіЄєҐґ\s'-]+$/;
+      if (!namePattern.test(name.trim())) {
+        console.log("Помилка: некоректне ім'я");
+        return getName();
+      }
+      getAge(name);
     });
-  });
+  }
+
+  function getAge(name: string) {
+    rl.question("Введіть вік (або залиште пустим): ", (ageInput) => {
+      let age: number | undefined = undefined;
+      if (ageInput.trim() !== "") {
+        age = Number(ageInput);
+        if (isNaN(age) || age <= 0) {
+          console.log("Помилка: yнекоректний вік");
+          return getAge(name);
+        }
+      }
+      getCity(name, age);
+    });
+  }
+
+  function getCity(name: string, age?: number) {
+    rl.question("Введіть місто (або залиште пустим): ", (cityInput) => {
+      let city = cityInput.trim() || undefined;
+
+      createCustomer(name, age, city);
+
+      console.log("Прізвища дизайнерів:", getWorkersSurnamesByCategory());
+      logFirstAvailable();
+
+      console.log("Доступні ID працівників:", workers.map(w => w.id).join(", "));
+
+      getWorkerIDs(name);
+    });
+  }
+
+  function getWorkerIDs(name: string) {
+    rl.question("Введіть ID працівників через кому: ", (idsInput) => {
+      const idsArray = idsInput.split(",").map(x => x.trim());
+      if (!idsArray.every(x => !isNaN(Number(x)) && Number(x) > 0)) {
+        console.log("Помилка: введені ID мають бути числами більше 0, розділеними комою.");
+        return getWorkerIDs(name);
+      }
+      const workerIDs = idsArray.map(x => Number(x));
+      const myWorkers = сheckoutWorkers(name, ...workerIDs);
+
+      console.log("Доступні працівники:");
+      myWorkers.forEach(w => console.log(w));
+
+      const exampleWorkers = сheckoutWorkers("Маргарита", 12, 3, 5); 
+      console.log("Робітники, які доступні для Маргарита, 12, ПП-32, фотошоп:");
+      exampleWorkers.forEach(w => console.log(w));
+
+      callback();
+    });
+  }
+
+  getName();
 }
